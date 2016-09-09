@@ -8,15 +8,15 @@
 #
 
 CXX = c++
-CXXFLAGS = -pthread -std=c++0x
+CXXFLAGS = -pthread -std=c++0x -fPIC
 OBJS = args.o dictionary.o matrix.o vector.o model.o utils.o
 INCLUDES = -I.
 
 opt: CXXFLAGS += -O3 -funroll-loops
-opt: fasttext
+opt: libfasttext.so fasttext
 
 debug: CXXFLAGS += -g -O0 -fno-inline
-debug: fasttext
+debug: libfasttext.so fasttext
 
 args.o: src/args.cc src/args.h
 	$(CXX) $(CXXFLAGS) -c src/args.cc
@@ -39,5 +39,8 @@ utils.o: src/utils.cc src/utils.h
 fasttext : $(OBJS) src/fasttext.cc
 	$(CXX) $(CXXFLAGS) $(OBJS) src/fasttext.cc -o fasttext
 
+libfasttext.so: $(OBJS) src/simplefasttext.cc
+	$(CXX) -shared $(CXXFLAGS) $(OBJS) src/simplefasttext.cc -o libfasttext.so
+
 clean:
-	rm -rf *.o fasttext
+	rm -rf *.o fasttext libfasttext.so
