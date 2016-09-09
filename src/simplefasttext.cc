@@ -64,22 +64,18 @@ int SimpleFastText::singlePredict(char * input_string, int * lables, float * pro
   return 0;
 }
 
-static SimpleFastText fasttext;
-static std::mutex mtx;
-static bool inited = false;
 extern "C" {
-  int init(char * model_path){
-    mtx.lock();
-    if(!inited)
-    {
-      utils::initTables();
-      fasttext.loadParams(std::string(model_path));
-      inited = true;
-    }
-    mtx.unlock();
-    return 0;
+ static void con() __attribute__((constructor));
+
+  void con() { 
+    utils::initTables();
   }
-  int predict(char * input_string, int * lables, float * probs, int k){
-    return fasttext.singlePredict(input_string, lables, probs, k);
+  void* load_model(char * model_path){
+    SimpleFastText * p = new SimpleFastText();
+    p->loadParams(std::string(model_path));
+    return p;
+  }
+  int predict(void* model, char * input_string, int * lables, float * probs, int k){
+    return ((SimpleFastText *)model)->singlePredict(input_string, lables, probs, k);
   }
 }
