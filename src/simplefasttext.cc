@@ -39,7 +39,7 @@ int SimpleFastText::loadParams(const std::string& filename) {
   return 0;
 }
 
-int SimpleFastText::singlePredict(char * input_string, int * lables, float * probs, int k) {
+int SimpleFastText::singlePredict(char * input_string, char** lables, float * probs, int k) {
   std::shared_ptr<Model> model = std::make_shared<Model>(input_, output_, args_, 0);
   if (args_->model == model_name::sup) {
     model->setTargetCounts(dict_->getCounts(entry_type::label));
@@ -58,7 +58,8 @@ int SimpleFastText::singlePredict(char * input_string, int * lables, float * pro
   model->predict(line, k, predictions);
   int i=0;
   for (auto it = predictions.cbegin(); it != predictions.cend() && i<k; it++, i++) {
-    lables[i]=it->second;
+    //!!!! This is not a good conversion.Just did not find an easy way to use ctypes with const char *. Try to fix it later.
+    lables[i]=(char*)(dict_->getLabel(it->second).c_str());
     probs[i]=exp(it->first);
   }
   return 0;
@@ -75,7 +76,7 @@ extern "C" {
     p->loadParams(std::string(model_path));
     return p;
   }
-  int predict(void* model, char * input_string, int * lables, float * probs, int k){
+  int predict(void* model, char * input_string, char** lables, float * probs, int k){
     return ((SimpleFastText *)model)->singlePredict(input_string, lables, probs, k);
   }
 }

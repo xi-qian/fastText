@@ -32,7 +32,7 @@ class SimpleFastText {
     std::shared_ptr<Model> model_;
   public:
     int loadParams(const std::string&);
-    int singlePredict(char * input_string, int * lables, float * probs, int k);
+    int singlePredict(char * input_string, char ** lables, float * probs, int k);
 };
 
 #endif
